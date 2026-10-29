@@ -1,0 +1,1528 @@
+
+/* =====================================================
+   UniVerseX — EXPLORE THE UNIVERSE
+   Cinematic Space Website
+   Card Movement: 0.40s
+   Photo Zoom: 0.65s
+   Heading Color: 0.3s
+   Photo Zoom Amount: 1.09
+===================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Orbitron:wght@400;500;600;700;800&display=swap');
+
+/* ================= ROOT VARIABLES ================= */
+
+:root {
+    --bg: #050610;
+    --bg-light: #090b1b;
+    --card: #0c1022;
+    --card-hover: #111832;
+
+    --white: #f5f7ff;
+    --muted: #a0aac5;
+
+    --purple: #9b7bff;
+    --cyan: #62e7ff;
+    --pink: #e58aff;
+
+    --border: rgba(159, 156, 255, 0.17);
+    --glow: rgba(125, 99, 255, 0.2);
+
+    --radius: 20px;
+    --max-width: 1240px;
+
+    --card-movement: 0.40s;
+    --photo-zoom-duration: 0.65s;
+    --heading-color-duration: 0.3s;
+    --photo-zoom-amount: 1.09;
+
+    --card-transition:
+        transform var(--card-movement) ease,
+        border-color var(--card-movement) ease,
+        box-shadow var(--card-movement) ease,
+        background-color var(--card-movement) ease;
+
+    --photo-transition:
+        transform var(--photo-zoom-duration) cubic-bezier(0.2, 0.7, 0.2, 1),
+        filter var(--photo-zoom-duration) ease;
+}
+
+/* ================= RESET ================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 100px;
+}
+
+body {
+    min-height: 100vh;
+    overflow-x: hidden;
+    color: var(--white);
+
+    background:
+        radial-gradient(ellipse at 50% 0%, #171038 0%, transparent 38%),
+        radial-gradient(ellipse at 0% 45%, #0a1630 0%, transparent 32%),
+        radial-gradient(ellipse at 100% 75%, #160b2d 0%, transparent 30%),
+        var(--bg);
+
+    font-family: "DM Sans", sans-serif;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+}
+
+img {
+    display: block;
+    width: 100%;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+button,
+a {
+    -webkit-tap-highlight-color: transparent;
+}
+
+button {
+    font: inherit;
+}
+
+::selection {
+    color: #050610;
+    background: var(--cyan);
+}
+
+/* ================= STAR BACKGROUND ================= */
+
+.stars {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.55;
+
+    background-image:
+        radial-gradient(1px 1px at 10% 20%, #fff 99%, transparent),
+        radial-gradient(1px 1px at 70% 35%, #8deaff 99%, transparent),
+        radial-gradient(2px 2px at 40% 80%, #fff 99%, transparent),
+        radial-gradient(1px 1px at 90% 70%, #b6a0ff 99%, transparent),
+        radial-gradient(1px 1px at 20% 65%, #fff 99%, transparent),
+        radial-gradient(2px 2px at 80% 10%, #9b7bff 99%, transparent),
+        radial-gradient(1px 1px at 55% 55%, #fff 99%, transparent);
+
+    background-size:
+        240px 240px,
+        310px 310px,
+        390px 390px,
+        280px 280px,
+        330px 330px,
+        420px 420px,
+        350px 350px;
+
+    animation: starDrift 90s linear infinite;
+}
+
+@keyframes starDrift {
+    from { background-position: 0 0; }
+    to { background-position: 300px 600px; }
+}
+
+/* ================= NAVIGATION ================= */
+
+header {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    width: 100%;
+    min-height: 78px;
+    padding: 15px max(5%, calc((100% - var(--max-width)) / 2));
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 30px;
+
+    background: rgba(5, 6, 16, 0.78);
+    border-bottom: 1px solid rgba(155, 123, 255, 0.13);
+
+    backdrop-filter: blur(22px);
+    -webkit-backdrop-filter: blur(22px);
+}
+
+.logo {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+
+    color: var(--white);
+    font-family: "Orbitron", sans-serif;
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: -1px;
+}
+
+.logo span {
+    color: var(--cyan);
+    text-shadow: 0 0 22px rgba(98, 231, 255, 0.65);
+}
+
+nav {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+}
+
+nav a {
+    position: relative;
+    color: #b4bdd4;
+    font-size: 13px;
+    font-weight: 600;
+    transition: color var(--heading-color-duration) ease;
+}
+
+nav a::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -8px;
+    width: 0;
+    height: 2px;
+    border-radius: 5px;
+
+    background: linear-gradient(90deg, var(--purple), var(--cyan));
+    transition: width var(--heading-color-duration) ease;
+}
+
+nav a:hover {
+    color: #fff;
+}
+
+nav a:hover::after {
+    width: 100%;
+}
+
+.menu-btn {
+    display: none;
+    padding: 10px 15px;
+    color: var(--white);
+    background: rgba(155, 123, 255, 0.1);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+/* ================= HERO SECTION ================= */
+
+.hero {
+    position: relative;
+    isolation: isolate;
+    min-height: 690px;
+    padding: 110px 24px 90px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    text-align: center;
+    overflow: hidden;
+}
+
+.hero::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    top: 45%;
+    left: 50%;
+    width: min(800px, 95vw);
+    aspect-ratio: 1;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+
+    background: radial-gradient(
+        circle,
+        rgba(98, 70, 255, 0.13) 0%,
+        rgba(68, 44, 155, 0.06) 35%,
+        transparent 70%
+    );
+
+    pointer-events: none;
+}
+
+.eyebrow,
+.number {
+    color: var(--cyan);
+    font-family: "Orbitron", sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 3px;
+}
+
+.eyebrow {
+    display: inline-block;
+    margin-bottom: 25px;
+    padding: 10px 17px;
+
+    background: rgba(98, 231, 255, 0.05);
+    border: 1px solid rgba(98, 231, 255, 0.2);
+    border-radius: 100px;
+    box-shadow: 0 0 35px rgba(98, 231, 255, 0.05);
+}
+
+.hero h1 {
+    max-width: 1000px;
+    font-family: "Orbitron", sans-serif;
+    font-size: clamp(39px, 7.1vw, 88px);
+    font-weight: 800;
+    line-height: 1.17;
+    letter-spacing: -3px;
+}
+
+.gradient {
+    color: transparent;
+
+    background: linear-gradient(
+        100deg,
+        #fff 0%,
+        #9fefff 27%,
+        #a38aff 62%,
+        #f0a0ff 100%
+    );
+
+    background-clip: text;
+    -webkit-background-clip: text;
+    filter: drop-shadow(0 0 24px rgba(139, 119, 255, 0.2));
+}
+
+.hero > p {
+    max-width: 690px;
+    margin-top: 26px;
+    color: var(--muted);
+    font-size: 16px;
+    line-height: 1.95;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 34px;
+    padding: 16px 27px;
+
+    color: #070817;
+    background: linear-gradient(110deg, #a894ff, #70e8ff);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 12px;
+
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 1px;
+
+    box-shadow:
+        0 0 25px rgba(155, 123, 255, 0.18),
+        0 0 55px rgba(98, 231, 255, 0.08);
+
+    transition:
+        transform var(--card-movement) ease,
+        box-shadow var(--card-movement) ease;
+}
+
+.btn:hover {
+    transform: translateY(-4px);
+    box-shadow:
+        0 0 30px rgba(155, 123, 255, 0.35),
+        0 0 70px rgba(98, 231, 255, 0.18);
+}
+
+.hero-orbit {
+    position: relative;
+    width: 140px;
+    height: 140px;
+    margin-top: 65px;
+
+    display: grid;
+    place-items: center;
+
+    border: 1px solid rgba(155, 123, 255, 0.2);
+    border-radius: 50%;
+
+    box-shadow:
+        0 0 45px rgba(155, 123, 255, 0.08),
+        inset 0 0 30px rgba(98, 231, 255, 0.04);
+
+    animation: floatOrbit 5s ease-in-out infinite;
+}
+
+.hero-orbit::before,
+.hero-orbit::after {
+    content: "";
+    position: absolute;
+    inset: 12px;
+    border: 1px solid rgba(98, 231, 255, 0.23);
+    border-radius: 50%;
+    transform: rotateX(65deg) rotate(-25deg);
+}
+
+.hero-orbit::after {
+    inset: -5px;
+    border-color: rgba(155, 123, 255, 0.25);
+    transform: rotateX(65deg) rotate(35deg);
+}
+
+.hero-orbit span {
+    font-size: 57px;
+    filter: drop-shadow(0 0 20px rgba(155, 123, 255, 0.4));
+}
+
+@keyframes floatOrbit {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+}
+
+/* ================= COMMON SECTIONS ================= */
+
+section#hierarchy,
+.discover-section {
+    position: relative;
+    padding: 100px max(5%, calc((100% - var(--max-width)) / 2));
+}
+
+.section-heading {
+    max-width: 760px;
+    margin: 0 auto 60px;
+    text-align: center;
+}
+
+.number {
+    display: inline-block;
+    margin-bottom: 18px;
+}
+
+.section-heading h2 {
+    color: var(--white);
+    font-family: "Orbitron", sans-serif;
+    font-size: clamp(28px, 4.2vw, 48px);
+    font-weight: 700;
+    line-height: 1.3;
+    letter-spacing: -1.3px;
+}
+
+.section-heading h2 span {
+    transition: color var(--heading-color-duration) ease;
+}
+
+.section-heading h2 span:hover {
+    color: var(--pink);
+}
+
+.section-heading > p {
+    max-width: 650px;
+    margin: 18px auto 0;
+    color: var(--muted);
+    font-size: 15px;
+    line-height: 1.9;
+}
+
+/* =====================================================
+   COSMIC HIERARCHY
+   Hover behavior matches Discover cards exactly.
+===================================================== */
+
+.hierarchy {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 27px;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.level {
+    position: relative;
+    display: grid;
+    grid-template-columns: 58px minmax(0, 1fr);
+    align-items: stretch;
+    gap: 22px;
+}
+
+/* Number */
+.level-number {
+    position: relative;
+    z-index: 1;
+
+    width: 48px;
+    height: 48px;
+    display: grid;
+    place-items: center;
+    margin-top: 22px;
+
+    color: var(--cyan);
+    background: #0a1021;
+    border: 1px solid rgba(98, 231, 255, 0.42);
+    border-radius: 50%;
+
+    font-family: "Orbitron", sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+
+    box-shadow:
+        0 0 18px rgba(98, 231, 255, 0.1),
+        inset 0 0 15px rgba(98, 231, 255, 0.04);
+
+    transition:
+        transform var(--card-movement) ease,
+        box-shadow var(--card-movement) ease;
+}
+
+.level:hover .level-number {
+    transform: scale(1.06);
+    box-shadow: 0 0 22px rgba(98, 231, 255, 0.24);
+}
+
+.level:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    top: 69px;
+    bottom: -27px;
+    left: 23px;
+    width: 1px;
+
+    background: linear-gradient(
+        180deg,
+        rgba(98, 231, 255, 0.4),
+        rgba(155, 123, 255, 0.08)
+    );
+}
+
+/* Hierarchy card — same movement, border, background and shadow as Discover */
+.level-card {
+    min-width: 0;
+    overflow: hidden;
+    padding: 27px;
+
+    background: linear-gradient(
+        155deg,
+        rgba(18, 22, 43, 0.97),
+        rgba(8, 10, 22, 0.98)
+    );
+
+    border: 1px solid var(--border);
+    border-radius: 17px;
+
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+
+    transition: var(--card-transition);
+}
+
+.level-card:hover {
+    transform: translateY(-8px);
+    background: var(--card-hover);
+    border-color: rgba(155, 123, 255, 0.55);
+
+    box-shadow:
+        0 22px 45px rgba(0, 0, 0, 0.25),
+        0 0 28px rgba(155, 123, 255, 0.1);
+}
+
+/* Heading */
+.level-top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.level-top h3 {
+    color: var(--white);
+    font-family: "Orbitron", sans-serif;
+    font-size: clamp(18px, 2.2vw, 24px);
+    font-weight: 600;
+    line-height: 1.5;
+
+    transition: color var(--heading-color-duration) ease;
+}
+
+.level-card:hover .level-top h3 {
+    color: var(--cyan);
+}
+
+/* Tag */
+.tag {
+    padding: 6px 10px;
+    color: var(--cyan);
+    background: rgba(98, 231, 255, 0.06);
+    border: 1px solid rgba(98, 231, 255, 0.18);
+    border-radius: 6px;
+
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1.3px;
+}
+
+/* Hierarchy photo — 16:9 */
+.level-image {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    margin: 22px 0;
+    overflow: hidden;
+
+    background: #080b14;
+    border: 1px solid rgba(155, 123, 255, 0.22);
+    border-radius: 13px;
+}
+
+.level-image img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+
+    transition: var(--photo-transition);
+}
+
+.level-card:hover .level-image img {
+    transform: scale(var(--photo-zoom-amount));
+    filter: brightness(1.08) saturate(1.1);
+}
+
+/* Description */
+.level-card > p {
+    margin-top: 14px;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.9;
+}
+
+.level-card > p strong {
+    color: #dce5ff;
+}
+
+/* Example */
+.example {
+    margin-top: 20px;
+    padding: 14px 17px;
+
+    color: #c4c4ef;
+
+    background: linear-gradient(
+        90deg,
+        rgba(155, 123, 255, 0.09),
+        rgba(98, 231, 255, 0.035)
+    );
+
+    border-left: 3px solid var(--purple);
+    border-radius: 0 9px 9px 0;
+
+    font-size: 12px;
+    line-height: 1.8;
+}
+
+
+
+
+
+
+
+/* UNIVERSE CONTENT — SINGLE BOX */
+
+.universe-card {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 27px;
+    position: relative;
+    overflow: hidden;
+
+    background: linear-gradient(
+        155deg,
+        rgba(18, 22, 43, 0.97),
+        rgba(8, 10, 22, 0.98)
+    );
+
+    border: 1px solid var(--border);
+    border-radius: 17px;
+
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+    transition: var(--card-transition);
+}
+
+.universe-card:hover {
+    transform: translateY(-8px);
+    background: var(--card-hover);
+    border-color: rgba(155, 123, 255, 0.55);
+
+    box-shadow:
+        0 22px 45px rgba(0, 0, 0, 0.25),
+        0 0 28px rgba(155, 123, 255, 0.1);
+}
+
+.universe-card .level-top h3 {
+    color: var(--white);
+    font-family: "Orbitron", sans-serif;
+    font-size: clamp(18px, 2.2vw, 24px);
+    line-height: 1.5;
+    transition: color var(--heading-color-duration) ease;
+}
+
+.universe-card:hover .level-top h3 {
+    color: var(--cyan);
+}
+
+.universe-content {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.universe-content > p {
+    margin-top: 16px;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.9;
+}
+
+.universe-content > p strong {
+    color: #dce5ff;
+}
+
+.universe-content .example {
+    margin-top: 22px;
+    padding: 17px 19px;
+    box-sizing: border-box;
+
+    color: #c4c4ef;
+
+    background: linear-gradient(
+        100deg,
+        rgba(155, 123, 255, 0.12),
+        rgba(98, 231, 255, 0.05)
+    );
+
+    border-left: 3px solid var(--purple);
+    border-radius: 0 10px 10px 0;
+
+    font-size: 13px;
+    line-height: 1.9;
+}
+
+.universe-content .example strong {
+    color: var(--cyan);
+    transition: color var(--heading-color-duration) ease;
+}
+
+.universe-card:hover .example strong {
+    color: var(--pink);
+}
+
+@media (max-width: 700px) {
+    .universe-card {
+        padding: 18px;
+    }
+
+    .universe-content > p {
+        font-size: 12px;
+        line-height: 1.85;
+    }
+
+    .universe-content .example {
+        padding: 13px;
+        font-size: 11px;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ==============================
+   UNIVERSE — ENDLESS MYSTERY
+============================== */
+
+.universe-card {
+    position: relative;
+    width: 100%;
+    max-width: 1250px;
+    margin: 50px auto 0;
+    padding: 27px;
+    box-sizing: border-box;
+    overflow: hidden;
+
+    background: linear-gradient(
+        155deg,
+        rgba(18, 22, 43, 0.97),
+        rgba(8, 10, 22, 0.98)
+    );
+
+    border: 1px solid var(--border);
+    border-radius: 17px;
+
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+    transition: var(--card-transition);
+}
+
+/* Purple and cyan top glow */
+
+.universe-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 10%;
+    width: 80%;
+    height: 1px;
+
+    background: linear-gradient(
+        90deg,
+        transparent,
+        var(--purple),
+        var(--cyan),
+        var(--purple),
+        transparent
+    );
+
+    pointer-events: none;
+}
+
+/* Ambient purple glow */
+
+.universe-card::after {
+    content: "";
+    position: absolute;
+    top: -100px;
+    right: -100px;
+    width: 220px;
+    height: 220px;
+
+    background: rgba(155, 123, 255, 0.09);
+    border-radius: 50%;
+    filter: blur(65px);
+
+    pointer-events: none;
+}
+
+/* Box hover */
+
+.universe-card:hover {
+    transform: translateY(-8px);
+    background: var(--card-hover);
+    border-color: rgba(155, 123, 255, 0.55);
+
+    box-shadow:
+        0 22px 45px rgba(0, 0, 0, 0.25),
+        0 0 28px rgba(155, 123, 255, 0.1);
+}
+
+/* ==============================
+   UNIVERSE HEADING
+============================== */
+
+.universe-card .level-top {
+    position: relative;
+    z-index: 1;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 14px;
+
+    margin-bottom: 22px;
+    padding-bottom: 18px;
+
+    border-bottom: 1px solid var(--border);
+}
+
+.universe-card .level-top h3 {
+    margin: 0;
+
+    color: var(--white);
+    font-family: "Orbitron", sans-serif;
+    font-size: clamp(18px, 2.2vw, 24px);
+    font-weight: 700;
+    line-height: 1.5;
+
+    transition: color var(--heading-color-duration) ease;
+}
+
+/* Heading changes color on hover */
+
+.universe-card:hover .level-top h3 {
+    color: var(--cyan);
+}
+
+
+
+
+/* ==============================
+   UNIVERSE CONTENT
+============================== */
+
+.universe-card .universe-content {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.universe-card .universe-content > p {
+    margin: 16px 0 0;
+
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.9;
+}
+
+.universe-card .universe-content > p strong {
+    color: #dce5ff;
+    font-weight: 700;
+}
+
+/* ==============================
+   GREATEST COSMIC MYSTERY
+============================== */
+
+.universe-card .universe-content .example {
+    margin-top: 22px;
+    padding: 17px 19px;
+    box-sizing: border-box;
+
+    color: var(--muted);
+
+    background: linear-gradient(
+        100deg,
+        rgba(155, 123, 255, 0.12),
+        rgba(98, 231, 255, 0.05)
+    );
+
+    border: 1px solid rgba(155, 123, 255, 0.12);
+    border-left: 3px solid var(--purple);
+    border-radius: 0 10px 10px 0;
+
+    font-size: 13px;
+    line-height: 1.9;
+}
+
+/* White by default */
+
+.universe-card .universe-content .example strong {
+    display: inline-block;
+    margin-right: 5px;
+
+    color: var(--white);
+    font-weight: 800;
+
+    transition: color var(--heading-color-duration) ease;
+}
+
+/* Turns cyan when hovering over the main box */
+
+.universe-card:hover .universe-content .example strong {
+    color: var(--purple);
+}
+
+/* Mystery box border changes on hover */
+
+.universe-card:hover .universe-content .example {
+    border-left-color: var(--purple);
+}
+
+/* ==============================
+   TABLET
+============================== */
+
+@media (max-width: 768px) {
+    .universe-card {
+        margin-top: 35px;
+        padding: 24px;
+        border-radius: 16px;
+    }
+
+    .universe-card .level-top {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 18px;
+    }
+
+    .universe-card .level-top h3 {
+        font-size: 22px;
+    }
+
+    .universe-card .universe-content > p {
+        font-size: 13px;
+        line-height: 1.85;
+    }
+
+    .universe-card .universe-content .example {
+        padding: 15px;
+        font-size: 12px;
+    }
+}
+
+/* ==============================
+   MOBILE
+============================== */
+
+@media (max-width: 480px) {
+    .universe-card {
+        margin-top: 25px;
+        padding: 18px;
+        border-radius: 14px;
+    }
+
+    .universe-card .level-top h3 {
+        font-size: 18px;
+    }
+
+    .universe-card .level-top .tag {
+        padding: 7px 10px;
+        font-size: 9px;
+        letter-spacing: 1px;
+    }
+
+    .universe-card .universe-content > p {
+        margin-top: 14px;
+        font-size: 12px;
+        line-height: 1.85;
+    }
+
+    .universe-card .universe-content .example {
+        margin-top: 18px;
+        padding: 13px;
+        font-size: 11px;
+        line-height: 1.85;
+    }
+}
+
+/* ==============================
+   REDUCED MOTION
+============================== */
+
+@media (prefers-reduced-motion: reduce) {
+    .universe-card,
+    .universe-card .level-top h3,
+    .universe-card .level-top .tag,
+    .universe-card .universe-content .example strong {
+        transition: none;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ================= DISCOVER SECTION ================= */
+
+.discover-section {
+    background:
+        radial-gradient(
+            ellipse at 50% 0%,
+            rgba(91, 64, 180, 0.13),
+            transparent 45%
+        ),
+        linear-gradient(
+            180deg,
+            rgba(8, 10, 25, 0.55),
+            rgba(5, 6, 16, 0.2)
+        );
+
+    border-top: 1px solid rgba(155, 123, 255, 0.1);
+    border-bottom: 1px solid rgba(155, 123, 255, 0.1);
+}
+
+.discover-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 25px;
+}
+
+.discover-card {
+    min-width: 0;
+    overflow: hidden;
+
+    background: linear-gradient(
+        155deg,
+        rgba(18, 22, 43, 0.97),
+        rgba(8, 10, 22, 0.98)
+    );
+
+    border: 1px solid var(--border);
+    border-radius: 17px;
+
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+
+    transition: var(--card-transition);
+}
+
+.discover-card:hover {
+    transform: translateY(-8px);
+    background: var(--card-hover);
+    border-color: rgba(155, 123, 255, 0.55);
+
+    box-shadow:
+        0 22px 45px rgba(0, 0, 0, 0.25),
+        0 0 28px rgba(155, 123, 255, 0.1);
+}
+
+/* Discover image — 1:1 */
+.discover-image {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    background: #080b14;
+}
+
+.discover-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+
+    transition: var(--photo-transition);
+}
+
+.discover-card:hover .discover-image img {
+    transform: scale(var(--photo-zoom-amount));
+    filter: brightness(1.08) saturate(1.1);
+}
+
+.discover-image::after {
+    content: "";
+    position: absolute;
+    inset: 45% 0 0;
+    pointer-events: none;
+
+    background: linear-gradient(
+        180deg,
+        transparent,
+        rgba(5, 6, 16, 0.32)
+    );
+}
+
+.discover-number {
+    position: absolute;
+    z-index: 2;
+    top: 15px;
+    left: 15px;
+
+    width: 39px;
+    height: 39px;
+    display: grid;
+    place-items: center;
+
+    color: #fff;
+    background: rgba(7, 9, 22, 0.72);
+    border: 1px solid rgba(255, 255, 255, 0.32);
+    border-radius: 50%;
+
+    font-family: "Orbitron", sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+
+    backdrop-filter: blur(10px);
+
+    transition:
+        transform var(--card-movement) ease,
+        border-color var(--card-movement) ease;
+}
+
+.discover-card:hover .discover-number {
+    transform: scale(1.06);
+    border-color: var(--cyan);
+}
+
+.discover-content {
+    padding: 23px;
+}
+
+.discover-category {
+    display: inline-block;
+    color: var(--cyan);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1.8px;
+    line-height: 1.8;
+}
+
+.discover-content h3 {
+    margin: 10px 0 12px;
+
+    color: var(--white);
+    font-family: "Orbitron", sans-serif;
+    font-size: clamp(16px, 1.7vw, 20px);
+    font-weight: 600;
+    line-height: 1.5;
+
+    transition: color var(--heading-color-duration) ease;
+}
+
+.discover-card:hover .discover-content h3 {
+    color: var(--cyan);
+}
+
+.discover-content p {
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.9;
+}
+
+.discover-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+
+    color: var(--cyan);
+    font-size: 12px;
+    font-weight: 700;
+
+    transition:
+        color var(--heading-color-duration) ease,
+        gap var(--card-movement) ease;
+}
+
+.discover-link:hover {
+    gap: 13px;
+    color: var(--pink);
+}
+
+/* ================= FOOTER ================= */
+
+footer {
+    position: relative;
+    padding: 65px 20px 28px;
+    text-align: center;
+    background: rgba(3, 4, 12, 0.75);
+}
+
+footer .logo {
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+footer > p {
+    margin-top: 8px;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+footer .copyright {
+    margin-top: 30px;
+    padding-top: 22px;
+
+    color: #737d98;
+    border-top: 1px solid rgba(155, 123, 255, 0.12);
+    font-size: 11px;
+}
+
+/* Main headings — same color transition as Discover card headings */
+#hierarchy .section-heading h2,
+.discover-section .section-heading h2 {
+    transition: color var(--heading-color-duration) ease;
+}
+
+#hierarchy .section-heading h2:hover,
+.discover-section .section-heading h2:hover {
+    color: var(--cyan);
+}
+
+/* Prevent the existing span hover color from overriding the effect */
+#hierarchy .section-heading h2:hover span,
+.discover-section .section-heading h2:hover span {
+    color: var(--cyan);
+}
+
+
+/* ================= TABLET ================= */
+
+@media (max-width: 1000px) {
+    .discover-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 22px;
+    }
+
+    section#hierarchy,
+    .discover-section {
+        padding-right: 5%;
+        padding-left: 5%;
+    }
+
+    .hero h1 {
+        letter-spacing: -2px;
+    }
+}
+
+/* ================= MOBILE ================= */
+
+@media (max-width: 700px) {
+    header {
+        min-height: 70px;
+        padding: 13px 5%;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .logo {
+        font-size: 21px;
+    }
+
+    .menu-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        font-size: 12px;
+    }
+
+    nav {
+        display: none;
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0;
+        padding: 8px 0;
+    }
+
+    nav.active {
+        display: flex;
+    }
+
+    nav a {
+        padding: 13px 5px;
+        border-bottom: 1px solid rgba(155, 123, 255, 0.1);
+    }
+
+    nav a::after {
+        display: none;
+    }
+
+    .hero {
+        min-height: 590px;
+        padding: 90px 6% 70px;
+    }
+
+    .hero h1 {
+        font-size: clamp(34px, 8vw, 57px);
+        letter-spacing: -1.5px;
+    }
+
+    .hero > p {
+        font-size: 14px;
+    }
+
+    .hero-orbit {
+        width: 110px;
+        height: 110px;
+        margin-top: 48px;
+    }
+
+    .hero-orbit span {
+        font-size: 45px;
+    }
+
+    section#hierarchy,
+    .discover-section {
+        padding: 75px 5%;
+    }
+
+    .section-heading {
+        margin-bottom: 40px;
+    }
+
+    .section-heading h2 {
+        font-size: clamp(26px, 6vw, 37px);
+    }
+
+    .section-heading > p {
+        font-size: 13px;
+    }
+
+    .level {
+        grid-template-columns: 38px minmax(0, 1fr);
+        gap: 12px;
+    }
+
+    .level-number {
+        width: 36px;
+        height: 36px;
+        margin-top: 18px;
+        font-size: 10px;
+    }
+
+    .level:not(:last-child)::after {
+        top: 54px;
+        bottom: -27px;
+        left: 17px;
+    }
+
+    .level-card {
+        padding: 18px;
+        border-radius: 15px;
+    }
+
+    .level-top {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .level-top h3 {
+        font-size: 17px;
+    }
+
+    .level-image {
+        margin: 17px 0;
+        border-radius: 10px;
+    }
+
+    .level-card > p {
+        font-size: 12px;
+    }
+
+    .example {
+        padding: 12px;
+        font-size: 11px;
+    }
+
+    .discover-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 15px;
+    }
+
+    .discover-content {
+        padding: 15px;
+    }
+
+    .discover-content h3 {
+        font-size: 14px;
+    }
+
+    .discover-content p {
+        font-size: 12px;
+        line-height: 1.75;
+    }
+
+    .discover-category {
+        font-size: 8px;
+        letter-spacing: 1px;
+    }
+
+    .discover-number {
+        top: 10px;
+        left: 10px;
+        width: 31px;
+        height: 31px;
+        font-size: 9px;
+    }
+}
+
+/* ================= SMALL MOBILE ================= */
+
+@media (max-width: 420px) {
+    .discover-grid {
+        grid-template-columns: 1fr;
+        gap: 22px;
+    }
+
+    .discover-content {
+        padding: 20px;
+    }
+
+    .discover-content h3 {
+        font-size: 18px;
+    }
+
+    .discover-content p {
+        font-size: 13px;
+    }
+
+    .hero h1 {
+        font-size: 32px;
+    }
+
+    .eyebrow,
+    .number {
+        font-size: 9px;
+        letter-spacing: 1.8px;
+    }
+
+    .level {
+        grid-template-columns: 32px minmax(0, 1fr);
+        gap: 9px;
+    }
+
+    .level-number {
+        width: 30px;
+        height: 30px;
+        font-size: 9px;
+    }
+
+    .level:not(:last-child)::after {
+        left: 14px;
+    }
+
+    .level-card {
+        padding: 14px;
+    }
+}
+
+/* ================= ACCESSIBILITY ================= */
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
